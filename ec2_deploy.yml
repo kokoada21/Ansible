@@ -4,7 +4,7 @@
 
   tasks:
     - name: Launch EC2 Instance
-      ec2_instance:
+      ec2:
         instance_type: t2.micro
         image_id: ami-0230bd60aa48260c6
         region: us-east-1
@@ -22,6 +22,13 @@
       add_host:
         hostname: "{{ item.public_ip_address }}"
         group_name: launched
+      loop: "{{ ec2_instance_result.instances }}"
+
+    - name: Wait for SSH connection
+      delegate_to: "{{ item.public_ip }}"
+      wait_for_connection:
+        delay: 30
+        timeout: 300
       loop: "{{ ec2_instance_result.instances }}"
 
 - name: Configure EC2
